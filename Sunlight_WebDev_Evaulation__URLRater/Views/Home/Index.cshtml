@@ -1,0 +1,102 @@
+﻿<script src="~/Scripts/tinysort.min.js"></script>
+<script src="~/Scripts/jquery.upvote.js"></script>
+<link href="~/Scripts/jquery.upvote.css" rel="stylesheet" />
+
+
+<div class="jumbotron">
+    <h1>URL Leaderboard</h1>
+</div>
+<div class="row">
+    <ul id="leaderboard" style="list-style-type:none;"></ul>
+</div>
+
+<script>
+    var uri = '/api/URL';
+
+    $(document).ready(function () {
+        getList();
+        sort();
+    });
+
+    function formatItem(item) {
+        return '<div class="upvote"><a class="upvote" value=' + item.Id + '></a><span class="count">' + item.Votes + '</span><a class="downvote" value=' + item.Id + '></div></a><div class="urlsize">' + item.Url + '</div>';
+    }
+
+    function getList() {
+        $.ajax({
+            url: uri,
+            dataType: 'json',
+            success: function (data) {
+                $("#leaderboard").empty();
+
+                for (i = 0; i < data.length; i++) {
+                    $("#leaderboard").append('<li id="vote' + data[i].Id + '" value=' + data[i].Votes + '>' + formatItem(data[i]) + '</li>');
+                }
+
+                setuVoting();
+            },
+        });
+    }
+
+    function sort()
+    {
+        tinysort('ul#leaderboard>li', { attr: 'value', order: 'desc' });
+        var t = setTimeout("sort()", 3000);
+    }
+
+    function setuVoting() {
+        $("#leaderboard a.upvote").each(function () {
+            //window.console && console.log("Each event Set")
+            $(this).on({
+                click: function () {
+                    window.console && console.log("ClickEvent")
+                    vote($(this));
+                }
+            });
+        });
+        $("#leaderboard a.downvote").each(function () {
+            //window.console && console.log("Each event Set")
+            $(this).on({
+                click: function () {
+                    window.console && console.log("ClickEvent")
+                    vote($(this));
+                }
+            });
+        });
+    }
+
+    function vote(voted) {
+        switch (voted.attr("class")) {
+            case "upvote":
+                var id = voted.attr("value");
+                var votes = parseInt($('#vote' + id).attr("value")) + 1;
+                $('#vote' + id).attr("value", votes);
+                //window.console && console.log("Sorter: vote" + id + "=" + $('#vote' + id).attr("value"));
+                $('#vote' + id).find("span.count").text(votes);
+                //window.console && console.log("Displayer: vote" + id + "=" + $('#vote' + id).find("span.count").innerText);
+                berak;
+            case "downvote":
+                var id = voted.attr("value");
+                var votes = parseInt($('#vote' + id).attr("value")) - 1;
+                $('#vote' + id).attr("value", votes - 1);
+                //window.console && console.log("Sorter: vote" + id + "=" + $('#vote' + id).attr("value"));
+                $('#vote' + id).find("span.count").text(votes);
+                //window.console && console.log("Displayer: vote" + id + "=" + $('#vote' + id).find("span.count").innerText);
+                break;
+            default:
+                break;
+        }
+    }
+</script>
+
+<style>
+    .urlsize
+    {
+        padding-left: 5px;
+        display: inline-block;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size:35px;
+    }
+</style>
